@@ -1,6 +1,6 @@
 [package]
-name = "game"
-version = "0.1.0"
+name = "petit-cadeau"
+version = "1.1.0"
 authors = ["dpapin1118 <denis.pro@isd.lu>"]
 edition = "2018"
 
