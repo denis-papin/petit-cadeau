@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::Path;
-use std::io;
+use std::{io, env};
 use std::fs::File;
 use std::process::exit;
 
@@ -17,17 +17,33 @@ fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 fn main() {
     println!("Welcome to the Répartiteur de coût.");
 
-    // { ("montre", "corinne") : 80 }
+    let args: Vec<String> = env::args().collect();
+
+    let file_name : &str;
+    if args.len() > 1 {
+        file_name = &args[1];
+    } else {
+        file_name = "./predicats";
+    }
+
+    // { (<cadeau>, <personne>) : <montant> }
     let mut gift_person_payment : HashMap<(String,String), f32> = HashMap::new();
+
+    // { <cadeau> : { <personne> : <solde> }   }
+    // Central structure to know who is above or under the standard payment for a gift
     let mut gift_person_balance : HashMap<String, HashMap<String, f32>> = HashMap::new();
+
+    // Simple list of gift's price
     let mut gift_cost : HashMap<String, f32> = HashMap::new();
+
+    // List of balance by person.
     let mut final_person_balance : HashMap<String, f32> = HashMap::new();
 
-
+    // List of predicates from the input file.
     let mut predicats : Vec<String> = vec![];
 
     // File hosts must exist in current path before this produces output
-    if let Ok(lines) = read_lines("./predicats") {
+    if let Ok(lines) = read_lines(file_name) {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {
@@ -73,6 +89,7 @@ fn main() {
 }
 
 /**
+    The amounts by gift for a person must be summed up to get the final balance.
 */
 fn compute_final_balance( final_person_balance : &mut HashMap<String, f32>,
                           gift_person_balance : &HashMap<String, HashMap<String, f32>>
@@ -100,6 +117,9 @@ fn compute_final_balance( final_person_balance : &mut HashMap<String, f32>,
 }
 
 /**
+    Adjust the balance according to the person's payments.
+    For example, if a gift has a cost by person of -30 and the person pays 20,
+    he remains -10 in debt.
 */
 fn compute_balance( gift_person_balance : &mut HashMap<String, HashMap<String, f32>>,
                     gift_person_payment : &HashMap<(String,String), f32>
@@ -122,6 +142,7 @@ fn compute_balance( gift_person_balance : &mut HashMap<String, HashMap<String, f
 }
 
 /**
+    Initialize the balances with the cost of the gift by person.
 */
 fn init_repartition( gift_person_balance : &mut HashMap<String, HashMap<String, f32>>,
                     gift_cost : &HashMap<String, f32>
@@ -196,6 +217,7 @@ fn parse_predicate( predicats : &Vec<String>,
             let gift = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref();
             let price = parts.get(2).unwrap().deref();
+            list_gift.push(gift.to_string());
             // Rule 2
             if gift_cost.contains_key(gift) {
                 println!("💣 Trop de coûts pour le cadeau {}", &gift);
@@ -207,6 +229,7 @@ fn parse_predicate( predicats : &Vec<String>,
         } else if p.contains( "repartition" ) {
             let gift = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref();
+            list_gift.push(gift.to_string());
             for i in 2..parts.len() {
                 let person = parts.get(i).unwrap().deref();
                 if person.trim() != "" {
@@ -235,6 +258,7 @@ fn parse_predicate( predicats : &Vec<String>,
 }
 
 /**
+    Apply rules to check the amounts.
 */
 fn check_healthy_payment(list_gift : &Vec<String>, gift_person_payment : &HashMap<(String,String), f32>, gift_cost: &HashMap<String, f32> ) {
     for g in list_gift {
