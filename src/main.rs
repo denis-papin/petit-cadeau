@@ -54,7 +54,6 @@ fn main() {
     }
 
     dbg!(&predicats);
-
     println!("**** Analyse *****");
 
     parse_predicate( &predicats,
@@ -63,8 +62,6 @@ fn main() {
                      &mut gift_cost);
 
     // dbg!(&gift_person_balance);
-
-
     println!("**** Repartition *****");
 
     init_repartition( &mut gift_person_balance,
@@ -161,11 +158,9 @@ fn init_repartition( gift_person_balance : &mut HashMap<String, HashMap<String, 
             },
         };
 
-
         let unitary_price : f32 = ( -1 as f32) * (*price / (n as f32));
 
         println!("Pour le cadeau [{}] chacun devra payer [{}]", gift, unitary_price);
-
         let pb = gift_person_balance.get_mut(gift).unwrap();
 
         pb.iter_mut().for_each(| ( _, v) | {
