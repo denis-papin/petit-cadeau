@@ -7,7 +7,6 @@ use std::process::exit;
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
     where P: AsRef<Path>, {
-
     use std::io::{BufRead};
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())
@@ -19,7 +18,7 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
 
-    let file_name : &str;
+    let file_name: &str;
     if args.len() > 1 {
         file_name = &args[1];
     } else {
@@ -27,20 +26,20 @@ fn main() {
     }
 
     // { (<cadeau>, <personne>) : <montant> }
-    let mut gift_person_payment : HashMap<(String,String), f32> = HashMap::new();
+    let mut gift_person_payment: HashMap<(String, String), f32> = HashMap::new();
 
     // { <cadeau> : { <personne> : <solde> }   }
     // Central structure to know who is above or under the standard payment for a gift
-    let mut gift_person_balance : HashMap<String, HashMap<String, f32>> = HashMap::new();
+    let mut gift_person_balance: HashMap<String, HashMap<String, f32>> = HashMap::new();
 
     // Simple list of gift's price
-    let mut gift_cost : HashMap<String, f32> = HashMap::new();
+    let mut gift_cost: HashMap<String, f32> = HashMap::new();
 
     // List of balance by person.
-    let mut final_person_balance : HashMap<String, f32> = HashMap::new();
+    let mut final_person_balance: HashMap<String, f32> = HashMap::new();
 
     // List of predicates from the input file.
-    let mut predicats : Vec<String> = vec![];
+    let mut predicats: Vec<String> = vec![];
 
     // File hosts must exist in current path before this produces output
     if let Ok(lines) = read_lines(file_name) {
@@ -56,46 +55,43 @@ fn main() {
     dbg!(&predicats);
     println!("**** Analyse *****");
 
-    parse_predicate( &predicats,
-                     &mut gift_person_payment,
-                     &mut gift_person_balance,
-                     &mut gift_cost);
+    parse_predicate(&predicats,
+                    &mut gift_person_payment,
+                    &mut gift_person_balance,
+                    &mut gift_cost);
 
     // dbg!(&gift_person_balance);
     println!("**** Repartition *****");
 
-    init_repartition( &mut gift_person_balance,
-                      &gift_cost);
+    init_repartition(&mut gift_person_balance,
+                     &gift_cost);
 
 
     println!("**** Balance *****");
 
-    compute_balance( &mut gift_person_balance,
-                      &gift_person_payment);
+    compute_balance(&mut gift_person_balance,
+                    &gift_person_payment);
 
     println!("Dette des personnes, par cadeau");
     dbg!(&gift_person_balance);
 
     println!("**** Montant dû par les personnes, négatif signifie que la persone doit de l'argent *****");
 
-    compute_final_balance( &mut final_person_balance,
-                     &gift_person_balance);
+    compute_final_balance(&mut final_person_balance,
+                          &gift_person_balance);
 
     dbg!(&final_person_balance);
-
 }
 
 /**
     The amounts by gift for a person must be summed up to get the final balance.
 */
-fn compute_final_balance( final_person_balance : &mut HashMap<String, f32>,
-                          gift_person_balance : &HashMap<String, HashMap<String, f32>>
+fn compute_final_balance(final_person_balance: &mut HashMap<String, f32>,
+                         gift_person_balance: &HashMap<String, HashMap<String, f32>>,
 ) {
     for (_, person_soldes) in gift_person_balance {
-
-        person_soldes.iter().for_each(|(person,v)| {
-
-            if ! final_person_balance.contains_key(person) {
+        person_soldes.iter().for_each(|(person, v)| {
+            if !final_person_balance.contains_key(person) {
                 // { "denis", -50 }
                 final_person_balance.insert(person.to_string(), 0.0);
             }
@@ -105,7 +101,7 @@ fn compute_final_balance( final_person_balance : &mut HashMap<String, f32>,
         });
     }
 
-    let big_total : f32 = final_person_balance.values().into_iter().sum();
+    let big_total: f32 = final_person_balance.values().into_iter().sum();
 
     // Rule 5
     if big_total.abs() > 0.3 {
@@ -118,52 +114,48 @@ fn compute_final_balance( final_person_balance : &mut HashMap<String, f32>,
     For example, if a gift has a cost by person of -30 and the person pays 20,
     he remains -10 in debt.
 */
-fn compute_balance( gift_person_balance : &mut HashMap<String, HashMap<String, f32>>,
-                    gift_person_payment : &HashMap<(String,String), f32>
+fn compute_balance(gift_person_balance: &mut HashMap<String, HashMap<String, f32>>,
+                   gift_person_payment: &HashMap<(String, String), f32>,
 ) {
-
-    for ( (gift, person), price) in gift_person_payment {
+    for ((gift, person), price) in gift_person_payment {
         match gift_person_balance.get_mut(gift) {
             Some(pb) => {
                 match pb.get_mut(person) {
                     Some(v) => *v = *v + *price,
                     None => {
-                        pb.insert(person.to_string(),*price );
-                    },
+                        pb.insert(person.to_string(), *price);
+                    }
                 }
-            },
+            }
             None => println!("Missing entry for gift"),
         }
-
     }
 }
 
 /**
     Initialize the balances with the cost of the gift by person.
 */
-fn init_repartition( gift_person_balance : &mut HashMap<String, HashMap<String, f32>>,
-                    gift_cost : &HashMap<String, f32>
+fn init_repartition(gift_person_balance: &mut HashMap<String, HashMap<String, f32>>,
+                    gift_cost: &HashMap<String, f32>,
 ) {
-
     for (gift, price) in gift_cost {
-
         let n = match gift_person_balance.get(gift) {
             Some(s) => {
                 s.len()
-            },
+            }
             None => {
                 // Rule 2
                 println!("💣 La répartition du cadeau {} est manquante", &gift);
                 exit(-78);
-            },
+            }
         };
 
-        let unitary_price : f32 = ( -1 as f32) * (*price / (n as f32));
+        let unitary_price: f32 = (-1 as f32) * (*price / (n as f32));
 
         println!("Pour le cadeau [{}] chacun devra payer [{}]", gift, unitary_price);
         let pb = gift_person_balance.get_mut(gift).unwrap();
 
-        pb.iter_mut().for_each(| ( _, v) | {
+        pb.iter_mut().for_each(|(_, v)| {
             *v = unitary_price;
         });
     }
@@ -179,18 +171,17 @@ Verification rules
     R4 : 1 gift => total paiement égal au coût du gift
     R5 : Somme des répartitions finale équal à ZERO +/- eps
 */
-fn parse_predicate( predicats : &Vec<String>,
-                    gift_person_payment : &mut HashMap<(String,String), f32>,
-                    gift_person_balance : &mut HashMap<String, HashMap<String, f32>>,
-                    gift_cost : &mut HashMap<String, f32>
+fn parse_predicate(predicats: &Vec<String>,
+                   gift_person_payment: &mut HashMap<(String, String), f32>,
+                   gift_person_balance: &mut HashMap<String, HashMap<String, f32>>,
+                   gift_cost: &mut HashMap<String, f32>,
 ) {
-
-    let mut list_gift : Vec<String> = vec![];
+    let mut list_gift: Vec<String> = vec![];
 
     // Analyse predicates
     for p in predicats {
         // Rule 0
-        let parts = p.split(" ").into_iter().filter(|&item| item != "" ).collect::<Vec<&str>>();
+        let parts = p.split(" ").into_iter().filter(|&item| item != "").collect::<Vec<&str>>();
         if p.contains("paye") {
             let person = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref(); //
@@ -207,7 +198,6 @@ fn parse_predicate( predicats : &Vec<String>,
             }
 
             gift_person_payment.insert(key, price.parse::<f32>().unwrap());
-
         } else if p.contains("coûte") {
             let gift = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref();
@@ -220,24 +210,24 @@ fn parse_predicate( predicats : &Vec<String>,
             }
 
             gift_cost.insert(gift.to_string(), price.parse::<f32>().unwrap());
-
-        } else if p.contains( "repartition" ) {
+        } else if p.contains("repartition") {
             let gift = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref();
             list_gift.push(gift.to_string());
 
             // TODO mettre la règle 1 pour un cadeau uniquement et non pas par personne.
             // ...
+            // ...
 
             for i in 2..parts.len() {
                 let person = parts.get(i).unwrap().deref();
                 if person.trim() != "" {
-                    if ! gift_person_balance.contains_key(gift) {
+                    if !gift_person_balance.contains_key(gift) {
                         // { "montre", {} }
-                        gift_person_balance.insert(gift.to_string(), HashMap::new() );
+                        gift_person_balance.insert(gift.to_string(), HashMap::new());
                     }
 
-                    let pb = gift_person_balance.get_mut(gift ).unwrap();
+                    let pb = gift_person_balance.get_mut(gift).unwrap();
                     // Rule 1
                     if pb.contains_key(person) {
                         println!("💣 Trop de répartition pour le cadeau {} et personne {}", &gift, &person);
@@ -248,25 +238,23 @@ fn parse_predicate( predicats : &Vec<String>,
                 }
             }
         }
-
     } // end loop
 
     // verify the gift_cost is complete and payments are corrects
     check_healthy_payment(&list_gift, &gift_person_payment, &gift_cost);
-
 }
 
 /**
     Apply rules to check the amounts.
 */
-fn check_healthy_payment(list_gift : &Vec<String>, gift_person_payment : &HashMap<(String,String), f32>, gift_cost: &HashMap<String, f32> ) {
+fn check_healthy_payment(list_gift: &Vec<String>, gift_person_payment: &HashMap<(String, String), f32>, gift_cost: &HashMap<String, f32>) {
     for g in list_gift {
         // Rule 1
         match gift_cost.get(g) {
             Some(cost) => {
                 // Rule 4
-                let mut total : f32 = 0.0;
-                gift_person_payment.iter().for_each(|(k,paiement)| {
+                let mut total: f32 = 0.0;
+                gift_person_payment.iter().for_each(|(k, paiement)| {
                     if k.0 == *g {
                         total = total + *paiement;
                     }
@@ -276,7 +264,7 @@ fn check_healthy_payment(list_gift : &Vec<String>, gift_person_payment : &HashMa
                     println!("💣 Mauvais paiement pour le cadeau {}, coût {}, paiement {}", &g, cost, total);
                     exit(-59);
                 }
-            },
+            }
             None => {
                 println!("💣 Coût manquant pour cadeau {}", &g);
                 exit(-68);
