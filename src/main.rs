@@ -135,7 +135,7 @@ fn init_repartition( gift_person_balance : &mut HashMap<String, HashMap<String, 
             },
             None => {
                 // Rule 2
-                println!("💣 Le coût du cadeau {} est manquant", &gift);
+                println!("💣 La répartition du cadeau {} est manquante", &gift);
                 exit(-78);
             },
         };
