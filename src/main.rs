@@ -1,6 +1,3 @@
-
-extern crate rand;
-
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::path::Path;
