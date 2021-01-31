@@ -1,0 +1,7 @@
+a paye 100 pour montre
+b paye 20 pour montre
+montre coûte 120
+montre repartition a b c
+c paye 200 pour livre
+livre coûte 200
+livre repartition b c
