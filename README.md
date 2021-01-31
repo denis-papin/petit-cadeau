@@ -2,7 +2,7 @@
 
 D'après une liste de règles simples, le programme va déterminer le montant que chaque personne doit.
 
-**Exemple de règle**
+**Exemple de règles**
 
 ```
 victor paye 3.00  pour wifi_ringo
@@ -20,9 +20,9 @@ assiette_maria coûte 39.95
 assiette_maria repartition juju ringo victor
 ```
 
-**Regles** 
+**Règles** 
 
-Il existe trois sorte de règle :
+Il existe trois sortes de règles :
 
 ```
 {personne} paye {montant} pour {cadeau}
