@@ -165,7 +165,7 @@ fn init_repartition(gift_person_balance: &mut HashMap<String, HashMap<String, f3
 /**
 Verification rules
     R0 : Enlever les items blancs dans le vecteur de split
-    R1 : 1 gift => 1 et uniquement 1 repartition
+    R1 : 1 gift et 1 personne => 1 et uniquement 1 repartition
     R2 : 1 gift => 1 et uniquement 1 coût
     R3 : 1 gift et 1 personne => 0 ou 1 paiement
     R4 : 1 gift => total paiement égal au coût du gift
@@ -214,10 +214,6 @@ fn parse_predicate(predicats: &Vec<String>,
             let gift = parts.get(0).unwrap().deref();
             let _action = parts.get(1).unwrap().deref();
             list_gift.push(gift.to_string());
-
-            // TODO mettre la règle 1 pour un cadeau uniquement et non pas par personne.
-            // ...
-
             for i in 2..parts.len() {
                 let person = parts.get(i).unwrap().deref();
                 if person.trim() != "" {
