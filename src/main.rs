@@ -217,7 +217,6 @@ fn parse_predicate(predicats: &Vec<String>,
 
             // TODO mettre la règle 1 pour un cadeau uniquement et non pas par personne.
             // ...
-            // ...
 
             for i in 2..parts.len() {
                 let person = parts.get(i).unwrap().deref();
