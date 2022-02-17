@@ -2,7 +2,7 @@
 
 D'après une liste de règles simples, le programme va déterminer le montant que chaque personne doit.
 
-**Exemple de règles**
+** Exemple de règles **
 
 ```
 victor paye 3.00  pour wifi_ringo
