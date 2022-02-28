@@ -20,7 +20,7 @@ assiette_maria coûte 39.95
 assiette_maria repartition juju ringo victor
 ```
 
-**Règles** 
+** Règles ** 
 
 Il existe trois sortes de règles :
 
