@@ -1,6 +1,6 @@
 ### Répartiteur 
 
-D'après une liste de règles simples, le programme va déterminer le montant que chaque personne doit.</b>
+D'après une liste de règles simples, le programme va déterminer le montant que chaque personne doit.
 
 ** Exemple de règles **
 
